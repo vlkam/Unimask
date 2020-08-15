@@ -63,10 +63,12 @@ class MockEditable() : Editable {
     }
 
     override fun append(charSequence: CharSequence?, i: Int, i1: Int): Editable {
+        str += charSequence
         return this
     }
 
     override fun append(c: Char): Editable {
+        str += c
         return this
     }
 
