@@ -11,11 +11,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.core.widget.addTextChangedListener
 import com.colvir.unimask.unimask.SlotsController
 import com.colvir.unimask.unimask.Unimask
 import kotlinx.android.synthetic.main.fragment_first.*
 
-class UnimaskTextWatcher(val editText: AppCompatEditText) : TextWatcher {
+class UnimaskTextWatcher(val editText: AppCompatEditText, mask : String?) : TextWatcher {
 
     var slotController : SlotsController
 
@@ -25,7 +26,7 @@ class UnimaskTextWatcher(val editText: AppCompatEditText) : TextWatcher {
 
     init{
 
-        slotController = Unimask.parseClassicMask("##.##.##")
+        slotController = Unimask.parseClassicMask(mask)
         val ed = Editable.Factory.getInstance().newEditable("")
         slotController.getContent(ed)
         try {
@@ -34,8 +35,20 @@ class UnimaskTextWatcher(val editText: AppCompatEditText) : TextWatcher {
             editText.filters = emptyArray()
             editText.editableText.filters = emptyArray()
             editText.editableText.append(ed)
+            val poz = slotController.findFirstEmptyPosition()
+            if(poz > -1){
+                editText.setSelection(poz)
+            }
         } finally {
             internalChange = false
+        }
+        editText.setOnFocusChangeListener { v, hasFocus ->
+            if(hasFocus){
+                val poz = slotController.findFirstEmptyPosition()
+                if(poz > -1){
+                    editText.setSelection(poz)
+                }
+            }
         }
     }
 
@@ -101,21 +114,17 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<Button>(R.id.button_first).setOnClickListener {
-            val filters = edit_text.filters
             Log.i("UTW","")
-            //findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
 
-        edit_text.inputType = InputType.TYPE_CLASS_DATETIME or InputType.TYPE_DATETIME_VARIATION_DATE or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-
-        val z = edit_text.filters
-        //edit_text.filters = emptyArray<InputFilter>()
-        //(edit_text as TextView).setPrivateFieldValue(TextView::class.java, "mFilters" ,emptyArray<InputFilter>())
-        val x = edit_text.filters
-
-        val watcher = UnimaskTextWatcher(edit_text)
-        edit_text.addTextChangedListener(watcher)
+        //date_text.inputType = InputType.TYPE_CLASS_DATETIME or InputType.TYPE_DATETIME_VARIATION_DATE or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        //val watcher = UnimaskTextWatcher(date_text, "")
+        //date_text.addTextChangedListener(watcher)
         //watcher.initialize()
+
+        //date_text.addTextChangedListener(UnimaskTextWatcher(date_text, "##.##.##"))
+
+        phone_text.addTextChangedListener(UnimaskTextWatcher(phone_text, "+7(###)###-##-##"))
 
     }
 }

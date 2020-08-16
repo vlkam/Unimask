@@ -12,7 +12,7 @@ open class SlotsController {
 
     var currentCursorPosition : Int = 0
 
-    protected val slots = mutableListOf<Slot>()
+    val slots = mutableListOf<Slot>()
 
     fun addSlot(slot : Slot){
         slots.add(slot)
@@ -34,7 +34,7 @@ open class SlotsController {
         val localPosition: Int
     )
 
-    fun findSlotByPosition(poz: Int) : SlotFindResult {
+    fun findSlotByPosition(poz: Int) : SlotFindResult? {
         var offset = 0
         for(slot in slots){
             if(poz >= offset && poz < offset + slot.length){
@@ -42,7 +42,25 @@ open class SlotsController {
             }
             offset += slot.length
         }
-        throw Exception("Slot not found")
+        return null
+    }
+
+    fun findFirstEmptyPosition() : Int {
+        var offset = 0
+        for(slot in slots){
+            when(slot){
+                is MaskSlot -> { }
+                is PlaceholderSlot -> {
+                    for(position in slot.positions){
+                        if(position.isEmpty()){
+                            return offset + slot.positions.indexOf((position))
+                        }
+                    }
+                }
+            }
+            offset += slot.length
+        }
+        return -1
     }
 
     class SlotOffsets(
@@ -81,18 +99,21 @@ open class SlotsController {
         return null
     }
 
-    fun insert(string : String, poz : Int, level : Int = 1) : SlotResult {
-
-        currentCursorPosition = poz
+    protected fun insert_internal (string : String, poz : Int, level : Int = 1) : SlotResult {
+        var currentPosition = poz
 
         for(char in string){
-            val slotFindResult = findSlotByPosition(currentCursorPosition)
+            val slotFindResult = findSlotByPosition(currentPosition)
+            if(slotFindResult == null){
+                // It should be end of mask
+                break
+            }
             val slot = slotFindResult.slot
             val res = slot.insert(char, slotFindResult.localPosition, isHint = false)
             when(res.status){
-                Slot.SlotResultStatuses.ACCEPTED ->{
+                Slot.SlotResultStatuses.ACCEPTED -> {
                     // All is OK
-                    currentCursorPosition += res.cursorOffset
+                    currentPosition += res.cursorOffset
                 }
                 Slot.SlotResultStatuses.NOT_ENOUGH_SPACE -> {
                     TODO()
@@ -111,12 +132,12 @@ open class SlotsController {
                     val nextSlotAfterMask = findNextAccessibleSlotAfterMask(maskSlot)
                     if(nextSlotAfterMask != null){
                         val offsets = calculateOffsetForSlot(nextSlotAfterMask)
-                        val res2 = insert(char.toString(), poz = offsets.startOffset, level = level + 1)
+                        val res2 = insert_internal(char.toString(), poz = offsets.startOffset, level = level + 1)
                         if(res2.status == Slot.SlotResultStatuses.ACCEPTED){
-                            currentCursorPosition = res2.cursorOffset
+                            currentPosition = res2.cursorOffset
                         } else {
                             // I have no idea what may we do here
-                            return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentCursorPosition)
+                            return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentPosition)
                         }
                     }
 
@@ -135,7 +156,29 @@ open class SlotsController {
 
             }
         }
-        return SlotResult(status = Slot.SlotResultStatuses.ACCEPTED, cursorOffset = currentCursorPosition)
+        return SlotResult(status = Slot.SlotResultStatuses.ACCEPTED, cursorOffset = currentPosition)
+    }
+
+    fun insert(string : String, poz : Int) : SlotResult {
+
+        var cursorPosition = poz
+
+        // Check the position
+        var firstEmptyPosition = findFirstEmptyPosition()
+        if(firstEmptyPosition != -1 && cursorPosition > firstEmptyPosition){
+            // There is an empty position before current position
+            cursorPosition = firstEmptyPosition
+        } else {
+            val res = findSlotByPosition(cursorPosition)
+            if(res != null && res.slot is MaskSlot){
+                // this is a mask, move for first empty position
+                cursorPosition = firstEmptyPosition
+            }
+        }
+
+        val res = insert_internal(string, cursorPosition)
+        currentCursorPosition = res.cursorOffset
+        return res
     }
 
 }

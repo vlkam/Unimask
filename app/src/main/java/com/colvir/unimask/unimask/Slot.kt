@@ -135,27 +135,27 @@ open class PlaceholderSlot(slotController : SlotsController, type : SlotType, va
 
     var includeHint : Boolean? = null
 
-    val content = mutableListOf<SlotPosition>()
+    val positions = mutableListOf<SlotPosition>()
 
     override val length: Int
-        get() = content.size
+        get() = positions.size
 
     init {
         for(i in 0 until size){
-            content.add(SlotPosition(this))
+            positions.add(SlotPosition(this))
         }
     }
 
     override fun getContent(editable : Editable){
-        for (poz in content){
+        for (poz in positions){
             poz.getValue(editable)
         }
     }
 
 
     fun doesItHaveOneModeEmptyPosition(fromPosition : Int) : Boolean{
-        for(index in fromPosition until content.size){
-            val pos = content[index]
+        for(index in fromPosition until positions.size){
+            val pos = positions[index]
             if(pos.isEmpty()){
                 return true
             }
@@ -170,7 +170,7 @@ open class PlaceholderSlot(slotController : SlotsController, type : SlotType, va
             return res
         }
 
-        val pos = content[localPosition]
+        val pos = positions[localPosition]
 
         // An easy case, position is empty
         if(pos.isEmpty()){
@@ -206,11 +206,12 @@ class Unimask {
         var DEFAULT_MASK_COLOR =  0x8A000000.toInt()
         var DEFAULT_HINT_COLOR =  0x8A000000.toInt()
 
-        fun parseClassicMask(mask : String, placeholder : Char = '#') : SlotsController {
+        fun parseClassicMask(mask : String?, placeholder : Char = '#') : SlotsController {
 
             val slotController = SlotsController()
             val sb = StringBuilder(50)
             var currentStatus : SlotType? = null
+
 
             fun addSlot(){
                 val slot = when(currentStatus){
@@ -222,16 +223,18 @@ class Unimask {
                 sb.clear()
             }
 
-            for(char in mask){
-                val stateForThisChar = if(char == placeholder) SlotType.PLACEHOLDER else SlotType.MASK
-                if(currentStatus != stateForThisChar && sb.isNotEmpty()){
+            if(!mask.isNullOrEmpty()){
+                for(char in mask){
+                    val stateForThisChar = if(char == placeholder) SlotType.PLACEHOLDER else SlotType.MASK
+                    if(currentStatus != stateForThisChar && sb.isNotEmpty()){
+                        addSlot()
+                    }
+                    currentStatus = stateForThisChar
+                    sb.append(char)
+                }
+                if(sb.isNotEmpty()){
                     addSlot()
                 }
-                currentStatus = stateForThisChar
-                sb.append(char)
-            }
-            if(sb.isNotEmpty()){
-                addSlot()
             }
             return slotController
         }
