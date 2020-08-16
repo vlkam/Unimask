@@ -150,6 +150,8 @@ open class SlotsController {
                             // I have no idea what may we do here
                             return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentPosition, poppedChar = null)
                         }
+                    } else {
+                        return res
                     }
 
                     /*

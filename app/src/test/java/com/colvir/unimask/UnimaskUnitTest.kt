@@ -68,5 +68,16 @@ class UnimaskUnitTest {
         }
     }
 
+    @Test
+    fun insertBeetweenAndRemoveOne() {
+        checkMask("/###/","/123/"){
+            it.insert("1",0)
+            it.insert("3",2)
+            it.insert("4", 3)
+            it.insert("2", 2)
+        }
+
+    }
+
 
 }
