@@ -45,18 +45,12 @@ open class SlotsController {
         return null
     }
 
-    fun findFirstEmptyPosition() : Int {
+    fun findFirstEmptyPosition(from : Int = -1) : Int {
         var offset = 0
         for(slot in slots){
-            when(slot){
-                is MaskSlot -> { }
-                is PlaceholderSlot -> {
-                    for(position in slot.positions){
-                        if(position.isEmpty()){
-                            return offset + slot.positions.indexOf((position))
-                        }
-                    }
-                }
+            val poz = slot.firstEmptyPosition()
+            if(poz > -1 && poz >= from){
+                return offset + poz
             }
             offset += slot.length
         }
@@ -137,7 +131,7 @@ open class SlotsController {
                             currentPosition = res2.cursorOffset
                         } else {
                             // I have no idea what may we do here
-                            return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentPosition)
+                            return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentPosition, poppedChar = null)
                         }
                     }
 
@@ -156,15 +150,18 @@ open class SlotsController {
 
             }
         }
-        return SlotResult(status = Slot.SlotResultStatuses.ACCEPTED, cursorOffset = currentPosition)
+        return SlotResult(status = Slot.SlotResultStatuses.ACCEPTED, cursorOffset = currentPosition, poppedChar = null)
     }
 
     fun insert(string : String, poz : Int) : SlotResult {
 
         var cursorPosition = poz
 
+        // If it's a bulk insert it should take into account there are may be mask inside
+        val isBulkInsert = string.length > 1
+
         // Check the position
-        var firstEmptyPosition = findFirstEmptyPosition()
+        val firstEmptyPosition = findFirstEmptyPosition()
         if(firstEmptyPosition != -1 && cursorPosition > firstEmptyPosition){
             // There is an empty position before current position
             cursorPosition = firstEmptyPosition
@@ -177,7 +174,19 @@ open class SlotsController {
         }
 
         val res = insert_internal(string, cursorPosition)
+
         currentCursorPosition = res.cursorOffset
+
+        // Check if the next slot is a mask ?
+        if(!isBulkInsert){
+            val firstEmptyPoz = findFirstEmptyPosition(currentCursorPosition)
+            if(firstEmptyPosition > currentCursorPosition){
+                currentCursorPosition = firstEmptyPosition
+            }
+        }
+
+
+
         return res
     }
 

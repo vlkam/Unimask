@@ -1,17 +1,17 @@
 package com.colvir.unimask
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.InputType
-import android.text.TextWatcher
+import android.text.*
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.widget.addTextChangedListener
+import com.colvir.unimask.unimask.SlotType
 import com.colvir.unimask.unimask.SlotsController
 import com.colvir.unimask.unimask.Unimask
 import kotlinx.android.synthetic.main.fragment_first.*
@@ -39,6 +39,51 @@ class UnimaskTextWatcher(val editText: AppCompatEditText, mask : String?) : Text
             if(poz > -1){
                 editText.setSelection(poz)
             }
+
+            // It doesn't allow set the cursor on a mask
+            editText.setAccessibilityDelegate(object : View.AccessibilityDelegate() {
+
+                fun checkPosition(eventType: Int){
+                    if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
+                        val delta = editText.selectionEnd - editText.selectionStart
+                        if (delta == 0) {
+                            val res = slotController.findSlotByPosition(editText.selectionStart)
+                            if (res?.slot?.type == SlotType.MASK) {
+                                val firstEmptyPosition = slotController.findFirstEmptyPosition()
+                                if (firstEmptyPosition != -1) {
+                                    try {
+                                        internalChange = true
+                                        editText.setSelection(firstEmptyPosition)
+                                    } finally {
+                                        internalChange = false
+                                    }
+                                }
+                            }
+                        }
+                        Log.i("", "")
+                    }
+                }
+
+                override fun sendAccessibilityEventUnchecked(host: View?,event: AccessibilityEvent?) {
+                    super.sendAccessibilityEventUnchecked(host, event)
+                    if(internalChange){
+                        return
+                    }
+
+                    if (event != null){
+                        checkPosition(event.eventType)
+                    }
+                }
+
+                override fun sendAccessibilityEvent(host: View?, eventType: Int) {
+                    super.sendAccessibilityEvent(host, eventType)
+                    if(internalChange){
+                        return
+                    }
+                    checkPosition(eventType)
+                }
+            })
+
         } finally {
             internalChange = false
         }
