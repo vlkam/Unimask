@@ -3,79 +3,69 @@ package com.colvir.unimask
 import android.text.Editable
 import android.text.Spannable
 import android.text.style.ForegroundColorSpan
+import com.colvir.unimask.unimask.SlotsController
 import com.colvir.unimask.unimask.Unimask
 import org.junit.Test
 
 import org.junit.Assert.*
 import java.lang.Exception
 
-
-
 class UnimaskUnitTest {
+
+    protected fun checkMask(mask : String, expectedResult : String, action : (controller:SlotsController)->Unit ){
+        val editable : Editable = MockEditable()
+        val controller = Unimask.parseClassicMask(mask)
+
+        action.invoke(controller)
+
+        controller.getContent(editable)
+        val content = editable.toString()
+        assertEquals(expectedResult,content)
+    }
+
 
     @Test
     fun parseClassicMask() {
-
-        val editable : Editable = MockEditable()
-
-        val controller = Unimask.parseClassicMask("##.##.##")
-        controller.getContent(editable)
-
-        val content = editable.toString()
-
-        assertEquals(content,"  .  .  ")
+        checkMask("##.##.##","  .  .  "){
+        }
     }
 
     @Test
     fun insertIntoEmptyClassicMaskWithMasksChars() {
-        val editable : Editable = MockEditable()
-        val controller = Unimask.parseClassicMask("##.##.##")
-
-        controller.insert("12.34.56",0)
-
-        controller.getContent(editable)
-        assertEquals("12.34.56", editable.toString())
-
+        checkMask("##.##.##","12.34.56"){
+            it.insert("12.34.56",0)
+        }
     }
 
     @Test
     fun insertIntoEmptyClassicMask() {
-        val editable : Editable = MockEditable()
-        val controller = Unimask.parseClassicMask("##.##.##")
-
-        controller.insert("123456",0)
-
-        controller.getContent(editable)
-        val content = editable.toString()
-        assertEquals(content,"12.34.56")
+        checkMask("##.##.##","12.34.56"){
+            it.insert("123456",0)
+        }
     }
 
     @Test
     fun insertExcessiveChar() {
-        val editable : Editable = MockEditable()
-        val controller = Unimask.parseClassicMask("##.##.##")
-
-        controller.insert("1234567",0)
-
-        controller.getContent(editable)
-        val content = editable.toString()
-        assertEquals(content,"12.34.56")
-    }
-
-    fun prepareMask(mask : String){
-
+        checkMask("##.##.##","12.34.56"){
+            it.insert("1234567",0)
+        }
     }
 
     @Test
     fun checkCursorPosition() {
-        val editable : Editable = MockEditable()
-        val controller = Unimask.parseClassicMask("(702)#####")
+        checkMask("(702)#####","(702)12   "){
+            it.insert("1",0)
+            it.insert("2",9)
+        }
+    }
 
-        controller.insert("1",0)
-        controller.insert("2",9)
-
-        controller.getContent(editable)
-        assertEquals("(702)12   ", editable.toString())
+    @Test
+    fun insertBeetween() {
+        checkMask("(702)#####","(702)123  "){
+            it.insert("1",0)
+            it.insert("3",9)
+            it.insert("2", 6)
+        }
     }
 
 

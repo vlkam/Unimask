@@ -96,7 +96,21 @@ open class SlotsController {
     protected fun insert_internal (string : String, poz : Int, level : Int = 1) : SlotResult {
         var currentPosition = poz
 
-        for(char in string){
+        val listOfChars = string.toMutableList()
+
+        fun removeProcessedChar(poppedChar : Char?){
+            if(poppedChar != null){
+                listOfChars[0] = poppedChar
+            } else {
+                listOfChars.removeAt(0)
+            }
+
+        }
+
+        while(listOfChars.size > 0){
+
+            val char = listOfChars[0]
+
             val slotFindResult = findSlotByPosition(currentPosition)
             if(slotFindResult == null){
                 // It should be end of mask
@@ -108,6 +122,8 @@ open class SlotsController {
                 Slot.SlotResultStatuses.ACCEPTED -> {
                     // All is OK
                     currentPosition += res.cursorOffset
+                    // Do we have a popped char ? If yes we should try to move this char
+                    removeProcessedChar(res.poppedChar)
                 }
                 Slot.SlotResultStatuses.NOT_ENOUGH_SPACE -> {
                     TODO()
@@ -129,6 +145,7 @@ open class SlotsController {
                         val res2 = insert_internal(char.toString(), poz = offsets.startOffset, level = level + 1)
                         if(res2.status == Slot.SlotResultStatuses.ACCEPTED){
                             currentPosition = res2.cursorOffset
+                            removeProcessedChar(res2.poppedChar)
                         } else {
                             // I have no idea what may we do here
                             return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentPosition, poppedChar = null)
@@ -177,11 +194,11 @@ open class SlotsController {
 
         currentCursorPosition = res.cursorOffset
 
-        // Check if the next slot is a mask ?
+        // Check if the next slot is a mask ? If it is it will move the cursor
         if(!isBulkInsert){
             val firstEmptyPoz = findFirstEmptyPosition(currentCursorPosition)
-            if(firstEmptyPosition > currentCursorPosition){
-                currentCursorPosition = firstEmptyPosition
+            if(firstEmptyPoz > currentCursorPosition){
+                currentCursorPosition = firstEmptyPoz
             }
         }
 
