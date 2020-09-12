@@ -1,149 +1,15 @@
 package com.colvir.unimask
 
+import android.graphics.Color
 import android.os.Bundle
-import android.text.*
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.core.widget.addTextChangedListener
-import com.colvir.unimask.unimask.SlotType
-import com.colvir.unimask.unimask.SlotsController
-import com.colvir.unimask.unimask.Unimask
+import com.colvir.unimask.unimask.*
 import kotlinx.android.synthetic.main.fragment_first.*
-
-class UnimaskTextWatcher(val editText: AppCompatEditText, mask : String?) : TextWatcher {
-
-    var slotController : SlotsController
-
-    private var internalChange : Boolean = false
-    private var newSubstr : String? = null
-    private var insertPosition : Int = 0
-
-    init{
-
-        slotController = Unimask.parseClassicMask(mask)
-        val ed = Editable.Factory.getInstance().newEditable("")
-        slotController.getContent(ed)
-        try {
-            internalChange = true
-            editText.editableText.clear()
-            editText.filters = emptyArray()
-            editText.editableText.filters = emptyArray()
-            editText.editableText.append(ed)
-            val poz = slotController.findFirstEmptyPosition()
-            if(poz > -1){
-                editText.setSelection(poz)
-            }
-
-            // It doesn't allow set the cursor on a mask
-            editText.setAccessibilityDelegate(object : View.AccessibilityDelegate() {
-
-                fun checkPosition(eventType: Int){
-                    if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
-                        val delta = editText.selectionEnd - editText.selectionStart
-                        if (delta == 0) {
-                            val res = slotController.findSlotByPosition(editText.selectionStart)
-                            if (res?.slot?.type == SlotType.MASK) {
-                                val firstEmptyPosition = slotController.findFirstEmptyPosition()
-                                if (firstEmptyPosition != -1) {
-                                    try {
-                                        internalChange = true
-                                        editText.setSelection(firstEmptyPosition)
-                                    } finally {
-                                        internalChange = false
-                                    }
-                                }
-                            }
-                        }
-                        Log.i("", "")
-                    }
-                }
-
-                override fun sendAccessibilityEventUnchecked(host: View?,event: AccessibilityEvent?) {
-                    super.sendAccessibilityEventUnchecked(host, event)
-                    if(internalChange){
-                        return
-                    }
-
-                    if (event != null){
-                        checkPosition(event.eventType)
-                    }
-                }
-
-                override fun sendAccessibilityEvent(host: View?, eventType: Int) {
-                    super.sendAccessibilityEvent(host, eventType)
-                    if(internalChange){
-                        return
-                    }
-                    checkPosition(eventType)
-                }
-            })
-
-        } finally {
-            internalChange = false
-        }
-        editText.setOnFocusChangeListener { v, hasFocus ->
-            if(hasFocus){
-                val poz = slotController.findFirstEmptyPosition()
-                if(poz > -1){
-                    editText.setSelection(poz)
-                }
-            }
-        }
-    }
-
-    override fun afterTextChanged(s: Editable?) {
-        if(internalChange){
-            return
-        }
-
-        try{
-            internalChange = true
-            if(newSubstr != null && s != null){
-                slotController.insert(newSubstr!!, insertPosition)
-
-            }
-            if(s != null){
-                s.clear()
-                slotController.getContent(s)
-                editText.setSelection(slotController.currentCursorPosition)
-            }
-        } finally {
-            internalChange = false
-        }
-
-
-
-        Log.i("UTW"," ${s?.toString()} selection ${editText.selectionStart}")
-    }
-
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        if(internalChange){
-            return
-        }
-
-        newSubstr = null
-        insertPosition = start
-
-        Log.i("UTW"," ${s?.toString()} selection ${editText.selectionStart} start $start  count $count  after $after")
-    }
-
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        if(internalChange){
-            return
-        }
-
-        newSubstr = s?.substring(start, start + count)
-
-        Log.i("UTW"," ${s?.toString()}  selection ${editText.selectionStart} start $start  before $before  count $count")
-    }
-
-}
 
 class FirstFragment : Fragment() {
 
@@ -169,7 +35,10 @@ class FirstFragment : Fragment() {
 
         //date_text.addTextChangedListener(UnimaskTextWatcher(date_text, "##.##.##"))
 
-        phone_text.addTextChangedListener(UnimaskTextWatcher(phone_text, "+7(###)###-##-##"))
+        val phoneWatcher = UnimaskTextWatcher(phone_text, "+7(###)###-##-##")
+        val codeSlot = phoneWatcher.slotController.slots[1] as PlaceholderSlot
+        codeSlot.valueColor = Color.RED
+        phone_text.addTextChangedListener(phoneWatcher)
 
     }
 }

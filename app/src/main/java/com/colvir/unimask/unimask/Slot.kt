@@ -14,9 +14,9 @@ enum class SlotType { MASK, PLACEHOLDER}
 
 abstract class Slot(val slotController : SlotsController, val type : SlotType){
 
-    var indexOfSlot : Int = 0
+    var indexOfSlotForDebugPurpose : Int = 0
 
-    enum class SlotResultStatuses { UNKNOWN, ACCEPTED, REFUSED, NOT_ENOUGH_SPACE }
+    enum class SlotResultStatuses { UNKNOWN, ACCEPTED, REFUSED }
 
     abstract fun getContent(editable : Editable)
     abstract val length : Int

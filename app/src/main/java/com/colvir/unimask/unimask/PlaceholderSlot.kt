@@ -2,7 +2,8 @@ package com.colvir.unimask.unimask
 
 import android.text.Editable
 
-open class PlaceholderSlot(slotController : SlotsController, type : SlotType, val size : Int) : Slot(slotController, type){
+open class PlaceholderSlot(slotController : SlotsController, type : SlotType, size : Int)
+    : Slot(slotController, type), Iterable<SlotPosition> {
 
     var hintColor : Int? = null
     var valueColor : Int? = null
@@ -37,19 +38,6 @@ open class PlaceholderSlot(slotController : SlotsController, type : SlotType, va
         }
     }
 
-
-    /*
-    fun doesItHaveOneModeEmptyPosition(fromPosition : Int) : Boolean{
-        for(index in fromPosition until positions.size){
-            val pos = positions[index]
-            if(pos.isEmpty()){
-                return true
-            }
-        }
-        return false
-    }
-     */
-
     override fun insert(c: Char, localPosition : Int, isHint: Boolean)  : SlotResult {
 
         val res = super.insert(c, localPosition, isHint)
@@ -64,5 +52,19 @@ open class PlaceholderSlot(slotController : SlotsController, type : SlotType, va
         return SlotResult(SlotResultStatuses.ACCEPTED, 1, poppedChar = previousChar )
     }
 
+    class PositionIterator(private val list : List<SlotPosition>) : Iterator<SlotPosition>{
+        var idx = 0
+
+        override fun hasNext(): Boolean = idx < list.size
+
+        override fun next(): SlotPosition = list[idx++]
+    }
+
+    override fun iterator(): Iterator<SlotPosition> = PositionIterator(positions)
+
+    fun removeValueAt(relativePosition: Int) {
+        val poz = positions[relativePosition]
+        poz.value = null
+    }
 
 }
