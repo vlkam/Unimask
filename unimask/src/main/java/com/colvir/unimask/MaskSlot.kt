@@ -15,7 +15,7 @@ open class MaskSlot (
         return if(maskColor != null){
             maskColor
         } else if(slotController.maskColor != null){
-            slotController.maskColor
+            slotController.maskColor!!
         } else {
             Unimask.DEFAULT_MASK_COLOR
         }

@@ -21,7 +21,7 @@ open class SlotPosition(val slot : PlaceholderSlot){
         } else if(slot.hintColor != null){
             slot.hintColor!!
         } else if(slot.slotController.hintColor != null){
-            slot.slotController.hintColor
+            slot.slotController.hintColor!!
         } else {
             Unimask.DEFAULT_HINT_COLOR
         }
@@ -33,7 +33,7 @@ open class SlotPosition(val slot : PlaceholderSlot){
         } else if(slot.valueColor != null){
             slot.valueColor!!
         } else if(slot.slotController.valueColor != null){
-            slot.slotController.valueColor
+            slot.slotController.valueColor!!
         } else {
             Unimask.DEFAULT_VALUE_COLOR
         }

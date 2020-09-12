@@ -7,9 +7,9 @@ import java.lang.Exception
 
 open class SlotsController {
 
-    val hintColor : Int? = null
-    val valueColor : Int? = null
-    val maskColor : Int? = null
+    var hintColor : Int? = null
+    var valueColor : Int? = null
+    var maskColor : Int? = null
     var includeHint : Boolean = true
 
     var currentCursorPosition : Int = 0

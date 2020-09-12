@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="UnimaskTextEdit">
+        <attr name="unimask_mask" format="string" />
+        <attr name="unimask_hint" format="string" />
+        <attr name="unimask_allowedChars" format="string" />
+        <attr name="unimask_deniedChars" format="string" />
+        <attr name="unimask_keepHint" format="boolean" />
+        <attr name="unimask_charRepresentation" format="string" />
+
+        <attr name="unimask_hintColor" format="color" />
+        <attr name="unimask_valueColor" format="color" />
+        <attr name="unimask_maskColor" format="color" />
+
+    </declare-styleable>
+
+</resources>

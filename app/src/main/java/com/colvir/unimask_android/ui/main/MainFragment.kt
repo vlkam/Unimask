@@ -48,7 +48,7 @@ class MainFragment : Fragment() {
         //val phoneWatcher = UnimaskTextWatcher(phone_text, "+7(###)###-##-##")
         //val codeSlot = phoneWatcher.slotController.slots[1] as PlaceholderSlot
         //codeSlot.valueColor = Color.RED
-        phone_text.maskRaw = "+7(###)###-##-##"
+        //phone_text.maskRaw = "+7(###)###-##-##"
 
         //phone_text.addTextChangedListener(phoneWatcher)
     }

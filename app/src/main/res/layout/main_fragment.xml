@@ -26,6 +26,12 @@
 
         <com.colvir.unimask.UnimaskTextEdit
             android:id="@+id/phone_text"
+
+            app:unimask_mask="+7(###)###-##-##"
+            app:unimask_hintColor="@android:color/holo_orange_dark"
+            app:unimask_valueColor="@android:color/holo_blue_dark"
+            app:unimask_maskColor="@android:color/holo_purple"
+
             android:inputType="phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
