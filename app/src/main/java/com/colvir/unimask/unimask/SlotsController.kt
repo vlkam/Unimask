@@ -16,6 +16,12 @@ open class SlotsController {
 
     val slots = mutableListOf<Slot>()
 
+    fun setHint(hint : String?){
+
+    }
+
+    var keepHint : Boolean = true
+
     fun addSlot(slot : Slot){
         slots.add(slot)
 

@@ -16,6 +16,7 @@
         android:layout_marginHorizontal="32dp"
         >
 
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -23,7 +24,7 @@
             android:layout_marginBottom="4dp"
             android:text="Phone"/>
 
-        <androidx.appcompat.widget.AppCompatEditText
+        <com.colvir.unimask.unimask.UnimaskTextEdit
             android:id="@+id/phone_text"
             android:inputType="phone"
             android:layout_width="match_parent"
