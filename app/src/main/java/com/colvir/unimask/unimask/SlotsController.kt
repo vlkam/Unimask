@@ -59,11 +59,6 @@ open class SlotsController {
         return -1
     }
 
-    class SlotOffsets(
-        val startOffset : Int,
-        val endOffset : Int
-    )
-
     class Position (
         val absolutePosition : Int,
         val relativePosition : Int,
@@ -253,21 +248,21 @@ open class SlotsController {
 
         var cursorPosition = poz
 
-        // If it's a bulk insert it should take into account there are may be mask inside
-        //val isBulkInsert = string.length > 1
-
         // Check the position
         val firstEmptyPosition = findFirstEmptyPosition()
         if(firstEmptyPosition != -1 && cursorPosition > firstEmptyPosition){
             // There is an empty position before current position
             cursorPosition = firstEmptyPosition
-        } else {
+        }
+        /*
+        else {
             val res = findNextPosition(cursorPosition)
             if(res != null && res.slot is MaskSlot){
                 // this is a mask, move for first empty position
                 cursorPosition = firstEmptyPosition
             }
         }
+         */
 
         val res = insert_internal(string, cursorPosition)
 
