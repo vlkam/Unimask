@@ -64,20 +64,22 @@ class UnimaskUnitTest {
 
     @Test
     fun insertBetween() {
-        checkMask("(702)#####","(702)123  ", 8){
-            it.insert("1",0)
-            it.insert("3",9)
-            it.insert("2", 6)
+        checkMask("(702)#####","(702)123  ", 7){
+            val sr1 = it.insert("1",0)
+            val sr2 =it.insert("3",9)
+            val sr3 =it.insert("2", 6)
+            val z = 4
         }
     }
 
     @Test
-    fun insertBeetweenAndRemoveOne() {
+    fun insertBetweenAndRemoveOne() {
         checkMask("/###/","/123/",3){
-            it.insert("1",0)
-            it.insert("3",2)
-            it.insert("4", 3)
-            it.insert("2", 2)
+            val sr1 = it.insert("1",0)
+            val sr2 = it.insert("3",2)
+            val sr3 = it.insert("4", 3)
+            val sr4 = it.insert("2", 2)
+            val z = 4
         }
 
     }

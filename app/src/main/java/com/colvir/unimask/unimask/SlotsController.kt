@@ -169,15 +169,25 @@ open class SlotsController {
 
     }
 
+    protected class InsertedChar(
+        val char : Char,
+        val status : Status
+    ){
+        enum class Status { NEW, REALLOCATED }
+    }
+
     protected fun insert_internal (string : String, poz : Int) : SlotResult {
 
         var currentPosition = poz
 
-        val listOfChars = string.toMutableList()
+        // Basically it is the current position, but we should take to account the reallocation shouldn't change the cursor position
+        var cursorPosition : Int = currentPosition
+
+        val listOfChars = string.toList().map { InsertedChar(char = it, status = InsertedChar.Status.NEW) }.toMutableList()
 
         fun removeProcessedChar(poppedChar : Char?){
             if(poppedChar != null){
-                listOfChars[0] = poppedChar
+                listOfChars[0] = InsertedChar(char = poppedChar,status = InsertedChar.Status.REALLOCATED)
             } else {
                 listOfChars.removeAt(0)
             }
@@ -194,11 +204,14 @@ open class SlotsController {
                 break
             }
             val slot = slotFindResult.slot
-            val res = slot.insert(char, slotFindResult.localPosition, isHint = false)
+            val res = slot.insert(char.char, slotFindResult.localPosition, isHint = false)
             when(res.status){
                 Slot.SlotResultStatuses.ACCEPTED -> {
                     // All is OK
                     currentPosition += res.cursorOffset
+                    if(char.status == InsertedChar.Status.NEW){
+                        cursorPosition = currentPosition
+                    }
                     // Do we have a popped char ? If yes we should try to move this char
                     removeProcessedChar(res.poppedChar)
                 }
@@ -206,21 +219,26 @@ open class SlotsController {
                     val maskSlot = slot as? MaskSlot
                     if(maskSlot == null){
                         // the slot refuses to accept char, what can we do? Perhaps nothing
+                        res.cursorOffset = cursorPosition
                         return res
                     }
                     // it's a mask, lets try to skip that
                     val nextSlotAfterMask = positionsList(currentPosition).firstOrNull()
                     if(nextSlotAfterMask != null){
                         val nextSlot = nextSlotAfterMask.slot
-                        val res2 = nextSlot.insert(char, 0, isHint = false)
+                        val res2 = nextSlot.insert(char.char, 0, isHint = false)
                         if(res2.status == Slot.SlotResultStatuses.ACCEPTED){
                             currentPosition = nextSlotAfterMask.absolutePosition + res2.cursorOffset
+                            if(char.status == InsertedChar.Status.NEW){
+                                cursorPosition = currentPosition
+                            }
                             removeProcessedChar(res2.poppedChar)
                         } else {
                             // no idea what we may do in that case
-                            return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = currentPosition, poppedChar = null)
+                            return SlotResult(status = Slot.SlotResultStatuses.REFUSED, cursorOffset = cursorPosition, poppedChar = null)
                         }
                     } else {
+                        res.cursorOffset = cursorPosition
                         return res
                     }
                 }
@@ -228,7 +246,7 @@ open class SlotsController {
 
             }
         }
-        return SlotResult(status = Slot.SlotResultStatuses.ACCEPTED, cursorOffset = currentPosition, poppedChar = null)
+        return SlotResult(status = Slot.SlotResultStatuses.ACCEPTED, cursorOffset = cursorPosition, poppedChar = null)
     }
 
     open fun insert(string : String, poz : Int) : SlotResult {

@@ -6,7 +6,7 @@ import android.text.style.ForegroundColorSpan
 
 class SlotResult(
     val status : Slot.SlotResultStatuses,
-    val cursorOffset : Int,
+    var cursorOffset : Int,
     val poppedChar : Char?
 )
 
