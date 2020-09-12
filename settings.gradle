@@ -1,2 +1,3 @@
+include ':Unimask'
 include ':app'
-rootProject.name = "Unimask"
+rootProject.name = "Unimask-android"
