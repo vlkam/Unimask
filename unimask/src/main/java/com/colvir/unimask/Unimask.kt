@@ -19,7 +19,7 @@ class Unimask {
 
             fun addSlot(){
                 val slot = when(currentStatus){
-                    SlotType.MASK -> MaskSlot(slotController, currentStatus!!, sb.toString(), isTransitionAllowed = true)
+                    SlotType.MASK -> MaskSlot(slotController, currentStatus!!, sb.toString())
                     SlotType.PLACEHOLDER -> PlaceholderSlot(slotController, currentStatus!!, sb.length)
                     else -> throw Exception("")
                 }

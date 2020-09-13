@@ -7,11 +7,16 @@ import org.junit.Assert.*
 
 class UnimaskUnitTest {
 
-    protected fun checkMask(mask : String, expectedResult : String, expectedCursorPosition : Int = -1, action : (controller:SlotsController)->Unit ){
-        val editable : Editable = MockEditable()
+    protected fun checkMask(mask : String, expectedResult : String, expectedCursorPosition : Int = -1, action : ((controller:SlotsController)->Unit)? ) {
         val controller = Unimask.parseClassicMask(mask)
+        checkMask(controller,expectedResult,expectedCursorPosition,action)
+    }
 
-        action.invoke(controller)
+
+    protected fun checkMask(controller: SlotsController, expectedResult : String, expectedCursorPosition : Int = -1, action : ((controller:SlotsController)->Unit)? ){
+        val editable : Editable = MockEditable()
+
+        action?.invoke(controller)
 
         controller.getContent(editable)
         val content = editable.toString()
@@ -133,6 +138,25 @@ class UnimaskUnitTest {
         checkMask("##.##.##","12.34.56",0){
             it.insert("12.34.56",0, isHint = true)
         }
+    }
+
+
+
+    // Stretch
+
+
+    @Test
+    fun stretchingInsert(){
+        val slotController = SlotsController().apply {
+            addSlot(StretchingSlot(this,SlotType.STRETCHING, 1))
+            addSlot(MaskSlot(this,SlotType.MASK,"-"))
+            addSlot(PlaceholderSlot(this,SlotType.MASK, 1))
+        }
+        checkMask(slotController,"12- ",2){
+            it.insert("1",0)
+            it.insert("2",1)
+        }
+
     }
 
 }

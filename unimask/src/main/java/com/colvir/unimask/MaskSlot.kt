@@ -5,8 +5,7 @@ import android.text.Editable
 open class MaskSlot (
     slotController : SlotsController,
     type : SlotType,
-    val mask : String,
-    val isTransitionAllowed : Boolean
+    val mask : String
 ) : Slot(slotController, type){
 
     val maskColor : Int? = null

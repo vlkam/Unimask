@@ -149,7 +149,7 @@ class UnimaskTextEdit : AppCompatEditText {
     }
 
 
-
+  
     init {
         addTextChangedListener(maskWatcher)
     }

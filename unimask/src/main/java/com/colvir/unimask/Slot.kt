@@ -10,7 +10,7 @@ class SlotResult(
     val poppedChar : Char?
 )
 
-enum class SlotType { MASK, PLACEHOLDER}
+enum class SlotType { MASK, PLACEHOLDER, STRETCHING }
 
 abstract class Slot(val slotController : SlotsController, val type : SlotType){
 

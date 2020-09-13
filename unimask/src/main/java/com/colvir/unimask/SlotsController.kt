@@ -31,6 +31,16 @@ open class SlotsController {
         }
     }
 
+    fun addSlots(vararg slotArray : Slot){
+        slots.addAll(slotArray)
+
+        var idx = 0
+        for(slt in slots){
+            slt.indexOfSlotForDebugPurpose = idx++
+        }
+
+    }
+
     fun getContent(editable : Editable) {
         for (slot in slots){
             slot.getContent(editable)
@@ -51,6 +61,13 @@ open class SlotsController {
             offset += slot.length
         }
         return null
+    }
+
+    fun findPreviousSlot(poz : Int) : SlotFindResult? {
+        if(poz == 0){
+            return null
+        }
+        return  findNextPosition(poz - 1)
     }
 
     fun findFirstEmptyPosition(from : Int = -1) : Int {
@@ -198,6 +215,23 @@ open class SlotsController {
         while(listOfChars.size > 0){
 
             val char = listOfChars[0]
+
+            // Check stretching slot
+            val previousSlot = findPreviousSlot(currentPosition)
+            if(previousSlot?.slot?.type == SlotType.STRETCHING){
+                val stretchingSlot = previousSlot.slot as StretchingSlot
+                val res = stretchingSlot.stretchingInsert(char.char, currentPosition, isHint)
+                if(res.status == Slot.SlotResultStatuses.ACCEPTED){
+                    // All is OK
+                    currentPosition += res.cursorOffset
+                    if(char.status == InsertedChar.Status.NEW && !isHint){
+                        cursorPosition = currentPosition
+                    }
+                    // Do we have a popped char ? If yes we should try to move this char
+                    removeProcessedChar(res.poppedChar)
+                    continue
+                }
+            }
 
             val slotFindResult = findNextPosition(currentPosition)
             if(slotFindResult == null){
