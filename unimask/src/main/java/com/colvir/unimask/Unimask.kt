@@ -21,15 +21,38 @@ class Unimask {
                 val slot = when(currentStatus){
                     SlotType.MASK -> MaskSlot(slotController, currentStatus!!, sb.toString())
                     SlotType.PLACEHOLDER -> PlaceholderSlot(slotController, currentStatus!!, sb.length)
+                    SlotType.STRETCHING -> StretchingSlot(slotController, currentStatus!!, sb.length)
                     else -> throw Exception("")
                 }
                 slotController.addSlot(slot)
                 sb.clear()
             }
 
+            var isStreching = false
+
             if(!mask.isNullOrEmpty()){
                 for(char in mask){
-                    val stateForThisChar = if(char == placeholder) SlotType.PLACEHOLDER else SlotType.MASK
+                    if(char == '{'){
+                        isStreching = true
+                        if(sb.isNotEmpty()){
+                            addSlot()
+                        }
+                        continue
+                    } else if (char == '}'){
+                        slotController.addSlot(StretchingSlot(slotController, SlotType.STRETCHING, sb.length))
+                        isStreching = false
+                        currentStatus = null
+                        sb.clear()
+                        continue
+                    } else if(isStreching){
+                        sb.append(char)
+                        continue
+                    }
+                    val stateForThisChar = if(char == placeholder){
+                        SlotType.PLACEHOLDER
+                    } else {
+                        SlotType.MASK
+                    }
                     if(currentStatus != stateForThisChar && sb.isNotEmpty()){
                         addSlot()
                     }

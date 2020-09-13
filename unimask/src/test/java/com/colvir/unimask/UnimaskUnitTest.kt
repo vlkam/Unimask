@@ -144,19 +144,37 @@ class UnimaskUnitTest {
 
     // Stretch
 
+    @Test
+    fun stretchingMask(){
+        checkMask("{#}"," ",0){}
+    }
 
     @Test
-    fun stretchingInsert(){
-        val slotController = SlotsController().apply {
-            addSlot(StretchingSlot(this,SlotType.STRETCHING, 1))
-            addSlot(MaskSlot(this,SlotType.MASK,"-"))
-            addSlot(PlaceholderSlot(this,SlotType.MASK, 1))
-        }
-        checkMask(slotController,"12- ",2){
+    fun stretchingEmptyMask(){
+        checkMask("{}","",0){}
+    }
+
+    @Test
+    fun stretchingComplicatedMask(){
+        checkMask("66({ })","66( )",0){}
+        checkMask("66({})","66()",0){}
+    }
+
+
+    @Test
+    fun stretchingInsertNotEmptyMask(){
+        checkMask("{ }-#","12- ",2){
             it.insert("1",0)
             it.insert("2",1)
         }
+    }
 
+    @Test
+    fun stretchingInsertEmptyMask(){
+        checkMask("{}-#","12- ",2){
+            it.insert("1",0)
+            it.insert("2",1)
+        }
     }
 
 }
