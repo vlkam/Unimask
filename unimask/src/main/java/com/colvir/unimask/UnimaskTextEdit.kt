@@ -79,8 +79,6 @@ class UnimaskTextEdit : AppCompatEditText {
 
     val maskWatcher : UnimaskTextWatcher = UnimaskTextWatcher()
 
-    var onTextChangedActionForUnifield : ((str: CharSequence?, rawText: String?) -> Unit)? = null
-
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
@@ -148,19 +146,8 @@ class UnimaskTextEdit : AppCompatEditText {
 
     }
 
-
-  
     init {
         addTextChangedListener(maskWatcher)
     }
-
-
-    override fun setText(text: CharSequence?, type: BufferType?) {
-        super.setText(text, type)
-
-        onTextChangedActionForUnifield?.invoke(text, maskWatcher.slotController?.content(0))
-    }
-
-
 
 }

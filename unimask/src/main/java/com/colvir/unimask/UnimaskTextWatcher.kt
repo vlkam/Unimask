@@ -25,6 +25,9 @@ open class UnimaskTextWatcher() : TextWatcher {
 
     protected var editText : AppCompatEditText? = null
 
+    var onTextChangedAction : ((str: CharSequence?, rawText: String?) -> Unit)? = null
+
+
     fun initialize(editText : AppCompatEditText){
 
         this.editText = editText
@@ -133,8 +136,7 @@ open class UnimaskTextWatcher() : TextWatcher {
             }
         }
 
-
-
+        onTextChangedAction?.invoke(s?.toString(), slotController?.content(0))
 
         Log.i("UTW"," ${s?.toString()} selection ${editText?.selectionStart}")
     }
