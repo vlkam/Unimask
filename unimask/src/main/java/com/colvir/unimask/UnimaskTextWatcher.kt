@@ -1,6 +1,7 @@
 package com.colvir.unimask
 
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
@@ -106,6 +107,8 @@ open class UnimaskTextWatcher() : TextWatcher {
         if(internalChange){
             return
         }
+
+        s?.filters = emptyArray<InputFilter>()
 
         if(slotController != null){
             try{
