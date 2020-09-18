@@ -204,12 +204,10 @@ open class SlotsController {
         val listOfChars = string.toList().map { InsertedChar(char = it, status = InsertedChar.Status.NEW) }.toMutableList()
 
         fun removeProcessedChar(poppedChar : Char?){
+            listOfChars.removeAt(0)
             if(poppedChar != null){
-                listOfChars[0] = InsertedChar(char = poppedChar,status = InsertedChar.Status.REALLOCATED)
-            } else {
-                listOfChars.removeAt(0)
+                listOfChars.add(InsertedChar(char = poppedChar,status = InsertedChar.Status.REALLOCATED))
             }
-
         }
 
         while(listOfChars.size > 0){
