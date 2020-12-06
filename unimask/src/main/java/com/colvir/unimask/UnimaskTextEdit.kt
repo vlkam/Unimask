@@ -1,6 +1,7 @@
 package com.colvir.unimask
 
 import android.content.Context
+import android.graphics.Rect
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.AppCompatEditText
@@ -76,8 +77,9 @@ class UnimaskTextEdit : AppCompatEditText {
 
         }
 
-
     val maskWatcher : UnimaskTextWatcher = UnimaskTextWatcher()
+
+    val onFocusListenters = mutableListOf<OnFocusChangeListener>()
 
     constructor(context: Context) : super(context)
 
@@ -101,6 +103,24 @@ class UnimaskTextEdit : AppCompatEditText {
             this.valueColor = this.valueColor
             this.maskColor = this.maskColor
         }
+    }
+
+    override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        super.onFocusChanged(focused, direction, previouslyFocusedRect)
+
+        if(focused){
+            val poz =  maskWatcher.slotController?.findFirstEmptyPosition() ?: -1
+            //Log.i(TAG,"on focus position $poz")
+            if(poz > -1){
+                setSelection(poz)
+                android.os.Handler().postDelayed({
+                    setSelection(poz)
+                },20)
+            }
+        }
+
+        onFocusListenters.forEach{ it.onFocusChange(this, focused) }
+
     }
 
     protected fun initialize(attrs: AttributeSet?){
@@ -148,6 +168,11 @@ class UnimaskTextEdit : AppCompatEditText {
 
     init {
         addTextChangedListener(maskWatcher)
+    }
+
+    override fun setTextColor(color: Int) {
+        super.setTextColor(color)
+        valueColor = color
     }
 
 }

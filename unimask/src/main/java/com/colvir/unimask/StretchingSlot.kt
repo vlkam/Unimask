@@ -8,4 +8,8 @@ open class StretchingSlot(slotController : SlotsController, type : SlotType, siz
         return result
     }
 
+    override fun firstEmptyPosition(): Int {
+        return positions.size
+    }
+
 }

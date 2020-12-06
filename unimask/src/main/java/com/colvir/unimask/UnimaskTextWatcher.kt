@@ -8,8 +8,6 @@ import android.view.View
 import android.view.accessibility.AccessibilityEvent
 import androidx.appcompat.widget.AppCompatEditText
 
-
-
 open class UnimaskTextWatcher() : TextWatcher {
 
     var slotController : SlotsController? = null
@@ -27,6 +25,9 @@ open class UnimaskTextWatcher() : TextWatcher {
 
     var onTextChangedAction : ((str: CharSequence?, rawText: String?) -> Unit)? = null
 
+    companion object {
+        const val TAG = "UTW"
+    }
 
     fun initialize(editText : AppCompatEditText){
 
@@ -59,7 +60,10 @@ open class UnimaskTextWatcher() : TextWatcher {
                                     if (firstEmptyPosition != -1) {
                                         try {
                                             internalChange = true
-                                            editText.setSelection(firstEmptyPosition)
+                                            // sometimes it the mask was changed from code here occurs an exception
+                                            if(editText.text?.length ?: 0 > firstEmptyPosition){
+                                                editText.setSelection(firstEmptyPosition)
+                                            }
                                         } finally {
                                             internalChange = false
                                         }
@@ -94,10 +98,15 @@ open class UnimaskTextWatcher() : TextWatcher {
                 internalChange = false
             }
             editText.setOnFocusChangeListener { v, hasFocus ->
+                //Log.i(TAG,"on focus")
                 if(hasFocus){
                     val poz = slotController?.findFirstEmptyPosition() ?: -1
+                    //Log.i(TAG,"on focus position $poz")
                     if(poz > -1){
                         editText.setSelection(poz)
+                        android.os.Handler().postDelayed({
+                            editText.setSelection(poz)
+                        },20)
                     }
                 }
             }

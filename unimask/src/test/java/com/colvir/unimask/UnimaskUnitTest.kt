@@ -66,8 +66,8 @@ class UnimaskUnitTest {
     fun insertBetween() {
         checkMask("(702)#####","(702)123  ", 7){
             val sr1 = it.insert("1",0)
-            val sr2 =it.insert("3",9)
-            val sr3 =it.insert("2", 6)
+            val sr2 = it.insert("3",9)
+            val sr3 = it.insert("2", 6)
             val z = 4
         }
     }
@@ -107,6 +107,15 @@ class UnimaskUnitTest {
             it.remove(0,8)
         }
     }
+
+    @Test
+    fun replaceAllChars() {
+        checkMask("##.##.##","12.34.56",8){
+            it.insert("888888",0)
+            it.insert("123456",0)
+        }
+    }
+
 
     @Test
     fun removeAtTheEnd() {
