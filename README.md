@@ -1,4 +1,5 @@
 Universal mask for input. 
+
 Powerful, universal, object-oriented, unit-tested
 
 Typical cases you may see in unit tests
